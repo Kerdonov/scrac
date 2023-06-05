@@ -1,0 +1,104 @@
+[bits 16]
+org 0x7c00
+
+; init stack
+mov ax, 0x8000
+mov ss, ax
+mov bp, ax
+mov sp, bp
+
+mov [diskNum], dl	; store drive number
+
+
+; switch to 32-bit protected mode
+cli
+lgdt [GDT_Descriptor]
+; change last bit of cr0 to 1
+mov eax, cr0
+or eax, 1
+mov cr0, eax	; 32-bit mode!
+; far jump
+jmp CODE_SEG:start_protected_mode
+
+[bits 32]
+start_protected_mode:
+    ; to print char to screen, write to video memory (0xb8000)
+    ; first byte - character	second byte - colour
+    mov esi, pmodeMsg
+    mov ah, 0xf0
+    call puts
+
+
+
+jmp $
+
+;
+; FUNCTIONS
+;
+
+; esi - msg start
+; ah - color code
+puts:
+    pusha
+    mov edi, 0xb8000
+    mov al, [esi]
+
+    .loop:
+	mov [edi], ax
+
+	inc esi
+	add edi, 2
+
+	mov al, [esi]
+	cmp al, 0
+	jne .loop
+
+    ret
+
+
+;
+; DATA
+;
+
+diskNum: db 0
+pmodeMsg: db "We are now in 32-bit protected mode! woo", 0
+
+
+;
+; GDT
+;
+
+GDT_Start:
+    null_descriptor:
+	dd 0		; four times 00000000
+	dd 0		; four times 00000000
+    code_descriptor:
+	dw 0xffff	; first 16 bits of limit
+	dw 0
+	db 0		; first 24 bytes of base
+	db 0b10011010	; pres, priv, type
+	db 0b11001111	; other flags + last 4 bytes of limit
+	db 0		; last 8 bits of base
+    data_descriptor:
+	dw 0xffff
+	dw 0
+	db 0
+	db 0b10010010
+	db 0b11001111
+	db 0
+GDT_End:
+
+GDT_Descriptor:
+    dw GDT_End - GDT_Start - 1	; size
+    dd GDT_Start		; start
+
+CODE_SEG equ code_descriptor - GDT_Start
+DATA_SEG equ data_descriptor - GDT_Start
+; equ for constants
+
+
+times 510-($-$$) db 0
+db 0x55, 0xaa
+
+; end of bootsector
+
