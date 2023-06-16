@@ -1,6 +1,6 @@
 #include "stdint.h"
 #include "memory.h"
-#include "idt.h"
+#include "int.h"
 #include "stdio.h"
 #include "vga.h"
 
@@ -73,64 +73,64 @@ void idt_install() {
 
     // exceptions
     // 0	division error
-    idt_set_gate(0, (usize)&isr0, 0x08, 0x8e);
+    idt_set_gate(0, (u32)&isr0, 0x08, 0x8e);
     // 1	debug
-    idt_set_gate(1, (usize)&isr1, 0x08, 0x8e);
+    idt_set_gate(1, (u32)&isr1, 0x08, 0x8e);
     // 2	nmi
-    idt_set_gate(2, (usize)&isr2, 0x08, 0x8e);
+    idt_set_gate(2, (u32)&isr2, 0x08, 0x8e);
     // 3	breakpoint
-    idt_set_gate(3, (usize)&isr3, 0x08, 0x8e);
+    idt_set_gate(3, (u32)&isr3, 0x08, 0x8e);
     // 4	overflow
-    idt_set_gate(4, (usize)&isr4, 0x08, 0x8e);
+    idt_set_gate(4, (u32)&isr4, 0x08, 0x8e);
     // 5	bound range exceeded
-    idt_set_gate(5, (usize)&isr5, 0x08, 0x8e);
+    idt_set_gate(5, (u32)&isr5, 0x08, 0x8e);
     // 6	invalid opcode
-    idt_set_gate(6, (usize)&isr6, 0x08, 0x8e);
+    idt_set_gate(6, (u32)&isr6, 0x08, 0x8e);
     // 7	device not available
-    idt_set_gate(7, (usize)&isr7, 0x08, 0x8e);
+    idt_set_gate(7, (u32)&isr7, 0x08, 0x8e);
     // 8	double fault
-    idt_set_gate(8, (usize)&isr8, 0x08, 0x8e);
+    idt_set_gate(8, (u32)&isr8, 0x08, 0x8e);
     // 9	LEGACY: cso
-    idt_set_gate(9, (usize)&isr9, 0x08, 0x8e);
+    idt_set_gate(9, (u32)&isr9, 0x08, 0x8e);
     // 10	invalid tss
-    idt_set_gate(10, (usize)&isr10, 0x08, 0x8e);
+    idt_set_gate(10, (u32)&isr10, 0x08, 0x8e);
     // 11	segment not present
-    idt_set_gate(11, (usize)&isr11, 0x08, 0x8e);
+    idt_set_gate(11, (u32)&isr11, 0x08, 0x8e);
     // 12	stack segment fault
-    idt_set_gate(12, (usize)&isr12, 0x08, 0x8e);
+    idt_set_gate(12, (u32)&isr12, 0x08, 0x8e);
     // 13	general protection fault
-    idt_set_gate(13, (usize)&isr13, 0x08, 0x8e);
+    idt_set_gate(13, (u32)&isr13, 0x08, 0x8e);
     // 14	page fault
-    idt_set_gate(14, (usize)&isr14, 0x08, 0x8e);
+    idt_set_gate(14, (u32)&isr14, 0x08, 0x8e);
     // 15	RESERVED
-    idt_set_gate(15, (usize)&isr15, 0x08, 0x8e);
+    idt_set_gate(15, (u32)&isr15, 0x08, 0x8e);
     // 16	x87 float exception
-    idt_set_gate(16, (usize)&isr16, 0x08, 0x8e);
+    idt_set_gate(16, (u32)&isr16, 0x08, 0x8e);
     // 17	alignment check
-    idt_set_gate(17, (usize)&isr17, 0x08, 0x8e);
+    idt_set_gate(17, (u32)&isr17, 0x08, 0x8e);
     // 18	machine check
-    idt_set_gate(18, (usize)&isr18, 0x08, 0x8e);
+    idt_set_gate(18, (u32)&isr18, 0x08, 0x8e);
     // 19	SIMD float exception
-    idt_set_gate(19, (usize)&isr19, 0x08, 0x8e);
+    idt_set_gate(19, (u32)&isr19, 0x08, 0x8e);
     // 20	virt exception
-    idt_set_gate(20, (usize)&isr20, 0x08, 0x8e);
+    idt_set_gate(20, (u32)&isr20, 0x08, 0x8e);
     // 21	control protection exception
-    idt_set_gate(21, (usize)&isr21, 0x08, 0x8e);
+    idt_set_gate(21, (u32)&isr21, 0x08, 0x8e);
     // 22-27	RESERVED
-    idt_set_gate(22, (usize)&isr22, 0x08, 0x8e);
-    idt_set_gate(23, (usize)&isr23, 0x08, 0x8e);
-    idt_set_gate(24, (usize)&isr24, 0x08, 0x8e);
-    idt_set_gate(25, (usize)&isr25, 0x08, 0x8e);
-    idt_set_gate(26, (usize)&isr26, 0x08, 0x8e);
-    idt_set_gate(27, (usize)&isr27, 0x08, 0x8e);
+    idt_set_gate(22, (u32)&isr22, 0x08, 0x8e);
+    idt_set_gate(23, (u32)&isr23, 0x08, 0x8e);
+    idt_set_gate(24, (u32)&isr24, 0x08, 0x8e);
+    idt_set_gate(25, (u32)&isr25, 0x08, 0x8e);
+    idt_set_gate(26, (u32)&isr26, 0x08, 0x8e);
+    idt_set_gate(27, (u32)&isr27, 0x08, 0x8e);
     // 28	hypervisor injection exception
-    idt_set_gate(28, (usize)&isr28, 0x08, 0x8e);
+    idt_set_gate(28, (u32)&isr28, 0x08, 0x8e);
     // 29	vmm comms exception
-    idt_set_gate(29, (usize)&isr29, 0x08, 0x8e);
+    idt_set_gate(29, (u32)&isr29, 0x08, 0x8e);
     // 30	security exception
-    idt_set_gate(30, (usize)&isr30, 0x08, 0x8e);
+    idt_set_gate(30, (u32)&isr30, 0x08, 0x8e);
     // 31	RESERVED
-    idt_set_gate(31, (usize)&isr31, 0x08, 0x8e);
+    idt_set_gate(31, (u32)&isr31, 0x08, 0x8e);
 
     idt_load();
     printf("IDT and IRSs loaded\n");
@@ -174,8 +174,7 @@ char *exception_messages[] = {
 void fault_handler(struct regs *r) {
     if (r->int_no < 32) {
 	setfg(RED);
-	printf("%s", exception_messages[r->int_no]);
-	printf(" Exception. System Halted!\n");
+	printf("%s Exception. System Halted!\n", exception_messages[r->int_no]);
 	setfg(WHITE);
 	for(;;);
     }

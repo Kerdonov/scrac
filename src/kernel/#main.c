@@ -1,25 +1,27 @@
 #include "x86.h"
 #include "stdio.h"
 #include "vga.h"
-#include "idt.h"
+#include "int.h"
 
-void test_exception();
+void clock(struct regs *r);
 
 extern void _start() {
-    printf("KERNEL loaded\n");
-    idt_install();
-    printf("IDT loaded\n");
-    
-    test_exception();
+    printf("--kernel loaded\n");
 
-    printf("test\n");
+    idt_install();
+    printf("--idt loaded\n");
+
+    irq_install_handler(0, *clock);
+    irq_install();
+    __asm__ __volatile__ ("sti");
+    printf("--interrupts enabled\n");
+    
 
 end:
     for (;;);
 }
 
 
-void test_exception() {
-    int a = 4 / 0;
-    int b = 5 / 0;
+void clock(struct regs *r) {
+    printf(".");
 }

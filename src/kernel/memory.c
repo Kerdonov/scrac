@@ -1,5 +1,5 @@
 #include "memory.h"
-#include "stdint.h"
+#include "types.h"
 
 void* memset(void* ptr, int value, u16 num) {
     u8* u8ptr = (u8*)ptr;

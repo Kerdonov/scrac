@@ -48,8 +48,10 @@ RED=\e[1;31m
 CYAN=\e[1;36m
 NC=\e[0m
 
-# main
-build: header $(BUILD_DIR)/OS.bin
+
+# bin
+build: $(BUILD_DIR)/OS.bin
+
 
 # main os bin file
 $(BUILD_DIR)/OS.bin: $(BUILD_DIR)/boot/boot.bin $(BUILD_DIR)/kernel/kernel.bin $(BUILD_DIR)/utility/zeroes.bin
@@ -96,10 +98,11 @@ $(BUILD_DIR)/utility/zeroes.bin: $(BOOT_SRC)/zeroes.asm
 
 
 
-# run os in qemu
+# run os in qemu (binary)
 run: $(BUILD_DIR)/OS.bin
-	@echo -e "${CYAN}RUN EMULATOR:${NC}"
+	@echo -e "${CYAN}LAUNCH EMULATOR:${NC}"
 	qemu-system-x86_64 -drive format=raw,file=$<,index=0,if=floppy, -m 128M
+
 
 # launch with debugging (gdb, port 1234)
 debug: $(BUILD_DIR)/OS.bin

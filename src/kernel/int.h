@@ -1,5 +1,5 @@
 #pragma once
-#include "stdint.h"
+#include "types.h"
 
 struct regs {
     unsigned int gs, fs, es, ds;      /* pushed the segs last */
@@ -11,3 +11,7 @@ struct regs {
 void idt_set_gate(u8 num, u32 base, u16 sel, u8 flags);
 void idt_install();
 void fault_handler(struct regs *p);
+
+void irq_install();
+void irq_install_handler(int irq, void (*handler)(struct regs *r));
+void irq_uninstall_handler(int irq);

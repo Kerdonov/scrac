@@ -42,6 +42,24 @@ global isr29
 global isr30
 global isr31
 
+global irq0
+global irq1
+global irq2
+global irq3
+global irq4
+global irq5
+global irq6
+global irq7
+global irq8
+global irq9
+global irq10
+global irq11
+global irq12
+global irq13
+global irq14
+global irq15
+
+
 isr0:
     cli
     push 1
@@ -224,6 +242,106 @@ isr31:
     push 0x1f
     jmp ISR_common_stub
 
+; IRQ-s
+irq0:
+    cli
+    push 0
+    push 32
+    jmp IRQ_common_stub
+
+irq1:
+    cli
+    push 0
+    push 33
+    jmp IRQ_common_stub
+
+irq2:
+    cli
+    push 0
+    push 34
+    jmp IRQ_common_stub
+
+irq3:
+    cli
+    push 0
+    push 35
+    jmp IRQ_common_stub
+
+irq4:
+    cli
+    push 0
+    push 36
+    jmp IRQ_common_stub
+
+irq5:
+    cli
+    push 0
+    push 37
+    jmp IRQ_common_stub
+
+irq6:
+    cli
+    push 0
+    push 38
+    jmp IRQ_common_stub
+
+irq7:
+    cli
+    push 0
+    push 39
+    jmp IRQ_common_stub
+
+irq8:
+    cli
+    push 0
+    push 40
+    jmp IRQ_common_stub
+
+irq9:
+    cli
+    push 0
+    push 41
+    jmp IRQ_common_stub
+
+irq10:
+    cli
+    push 0
+    push 42
+    jmp IRQ_common_stub
+
+irq11:
+    cli
+    push 0
+    push 43
+    jmp IRQ_common_stub
+
+irq12:
+    cli
+    push 0
+    push 44
+    jmp IRQ_common_stub
+
+irq13:
+    cli
+    push 0
+    push 45
+    jmp IRQ_common_stub
+
+irq14:
+    cli
+    push 0
+    push 46
+    jmp IRQ_common_stub
+
+irq15:
+    cli
+    push 0
+    push 47
+    jmp IRQ_common_stub
+
+
+
+extern irq_handler
 
 extern fault_handler
 
@@ -251,3 +369,27 @@ ISR_common_stub:
     popa
     add esp, 8     ; Cleans up the pushed error code and pushed ISR number
     iret           ; pops 5 things at once: CS, EIP, EFLAGS, SS, and ESP!
+
+IRQ_common_stub:
+    pusha
+    push ds
+    push es
+    push fs
+    push gs
+    mov ax, 0x10
+    mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov eax, esp
+    push eax
+    mov eax, irq_handler
+    call eax
+    pop eax
+    pop gs
+    pop fs
+    pop es
+    pop ds
+    popa
+    add esp, 8
+    iret
