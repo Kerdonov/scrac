@@ -7,7 +7,6 @@ const row empty_row;
 
 
 void puts(char* str, int color) {
-
     while (*str)
 	putc(*str++, color);
 }
@@ -55,5 +54,21 @@ void newline() {
 	y--;
 	buffer->rows[y] = empty_row;
     }
+    update_cursor(x, y);
+}
+
+void backspace() {
+    u16 pos = get_cursor_position();
+    int x = pos % VGA_WIDTH;
+    int y = pos / VGA_WIDTH;
+
+    // can't go back one line (for now?)
+    if (x == 0)
+	return;
+
+    x--;
+    buffer->rows[y].cols[x].c = '\0';
+    buffer->rows[y].cols[x].color = 0x0F;
+
     update_cursor(x, y);
 }

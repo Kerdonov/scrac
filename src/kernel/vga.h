@@ -43,3 +43,4 @@ void putint(int i, int base, int color);
 //void putlonglong(long long int* p, int base, int color);
 
 void newline();
+void backspace();
