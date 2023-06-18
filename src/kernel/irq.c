@@ -1,5 +1,7 @@
 #include "int.h"
 #include "x86.h"
+#include "keyboard.h"
+#include "stdio.h"
 
 extern void irq0();
 extern void irq1();
@@ -45,6 +47,15 @@ void irq_remap(void) {
     outb(PIC2_DATA, 0x0);
 }
 
+// misc irq's
+
+void clock(struct regs *r) {
+    //printf(".");
+    return;
+}
+
+// end of misc irq's
+
 void irq_install() {
     irq_remap();
 
@@ -64,6 +75,9 @@ void irq_install() {
     idt_set_gate(45, (u32)irq13, 0x08, 0x8E);
     idt_set_gate(46, (u32)irq14, 0x08, 0x8E);
     idt_set_gate(47, (u32)irq15, 0x08, 0x8E);
+
+    irq_install_handler(0, *clock);
+    irq_install_handler(1, *print_keypress);
 }
 
 void irq_handler(struct regs *r) {

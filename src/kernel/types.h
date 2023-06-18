@@ -11,3 +11,7 @@ typedef unsigned long long int u64;
 
 typedef unsigned usize;
 typedef int size;
+
+typedef u8 bool;
+#define false	0
+#define true	1

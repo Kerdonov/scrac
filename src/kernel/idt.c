@@ -133,7 +133,6 @@ void idt_install() {
     idt_set_gate(31, (u32)&isr31, 0x08, 0x8e);
 
     idt_load();
-    printf("IDT and IRSs loaded\n");
 }
 
 char *exception_messages[] = {
