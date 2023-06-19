@@ -5,15 +5,14 @@
 
 
 extern void _start() {
-    printf("[kernel loaded]\n");
+    debug_log("kernel loaded");
 
     idt_install();
-    printf("[idt loaded]\n");
+    debug_log("idt loaded");
 
     irq_install();
     __asm__ __volatile__ ("sti");
-    printf("[interrupts enabled]\n");
-    
+    debug_log("interrupts enabled");
 
 end:
     for (;;);

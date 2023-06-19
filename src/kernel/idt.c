@@ -172,9 +172,7 @@ char *exception_messages[] = {
 
 void fault_handler(struct regs *r) {
     if (r->int_no < 32) {
-	setfg(RED);
-	printf("%s Exception. System Halted!\n", exception_messages[r->int_no]);
-	setfg(WHITE);
+	error_log("%s Exception. System Halted", exception_messages[r->int_no]);
 	for(;;);
     }
 }

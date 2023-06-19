@@ -4,6 +4,8 @@
 #define PRINTF_STATE_NORMAL		0
 #define PRINTF_STATE_MODE		1
 
+void print_inner(const char* fmt, int color, int* argp);
+
 
 int BG_COLOR = BLACK;
 int FG_COLOR = WHITE;
@@ -16,14 +18,41 @@ void setfg(int color) {
     FG_COLOR = color;
 }
 
+// this doesn't need \n
+void __attribute__((cdecl)) debug_log(const char* fmt, ...) {
+    int* argp = (int*)&fmt;
+    argp++;
+    int color = (BLACK << 1) + YELLOW;
+
+    putc('[', color);
+    print_inner(fmt, color, argp);
+    putc(']', color);
+    putc('\n', color);
+}
+
+// this doesn't need \n
+void __attribute__((cdecl)) error_log(const char* fmt, ...) {
+    int* argp = (int*)&fmt;
+    argp++;
+    int color = (BLACK << 1) + RED;
+
+    puts("!!!", color);
+    print_inner(fmt, color, argp);
+    puts("!!!\n", color);
+}
+
 
 void __attribute__((cdecl)) printf(const char* fmt, ...) {
 
     int* argp = (int*)&fmt;
-    int state = PRINTF_STATE_NORMAL;
+    argp++;
     int color = (BG_COLOR << 1) + FG_COLOR;
 
-    argp++;
+    print_inner(fmt, color, argp);
+}
+
+void print_inner(const char* fmt, int color, int* argp) {
+    int state = PRINTF_STATE_NORMAL;
 
     while (*fmt) {
 	switch (state) {
