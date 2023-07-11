@@ -128,7 +128,17 @@ info: header
 	@echo -e "This project needs i386elfgcc and binutils to cross compile C code. For more info, see this install script (for Arch Linux)"
 	@echo -e "${SCRIPT_LINK}\n"
 	@echo -e "I want to thank Daedalus Community, nanobyte, Uncle Scientist on YouTube, Philipp Oppermann and Brandon F. for teaching me the basics of operating system development.\n"
+	@echo "I ♡ GNU make now, wth"
 
 header:
 	@echo ""
 	@echo -e "${BLUE}$$HEADER${NC}"
+
+
+
+# print personal notes on what to do next
+next:
+	@echo "Create different interrupt handlers."
+	@echo "Second, make yourself comfortable with memory management. Read about and implement paging (and everything else I have yet to find out about). Organize the memory of the kernel PERFECTLY. (the fact that I have no idea where i could fit in my heap, is a problem.)"
+	@echo "Implement an allocator (preferrably (l grammar) fixed size block or linked list)"
+	@echo "I am leaning towards fixed size block, but idk. It just seems more organized."

@@ -24,6 +24,25 @@ mov cl, 0x02		; sector
 mov dl, [BOOT_DISK]	; drive
 int 0x13
 
+; print boot message
+pusha
+mov ah, 0x0e
+mov bx, boot_msg
+
+.puts:
+    mov al, [bx]
+    cmp al, 0
+    je .end
+
+    int 0x10
+    inc bl
+    jmp .puts
+
+.end:
+    ;mov ah, 0
+    ;int 0x16
+    popa
+
 ; switch to text mode
 mov ah, 0x0
 mov al, 0x3
@@ -85,6 +104,7 @@ start_protected_mode:
     jmp KERNEL_LOCATION		; jump to kernel location
 
 
+boot_msg: db "kernel loaded, press any key to boot...", 0
 
 times 510-($-$$) db 0
 dw 0xaa55

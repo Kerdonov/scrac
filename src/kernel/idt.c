@@ -171,8 +171,9 @@ char *exception_messages[] = {
 };
 
 void fault_handler(struct regs *r) {
-    if (r->int_no < 32) {
-	error_log("%s Exception. System Halted", exception_messages[r->int_no]);
-	for(;;);
+    switch (r->int_no) {
+	default:
+	    error_log("Unrecoverable (for now): %s", exception_messages[r->int_no]);
+	    for(;;);
     }
 }
