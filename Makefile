@@ -101,13 +101,13 @@ $(BUILD_DIR)/utility/zeroes.bin: $(BOOT_SRC)/zeroes.asm
 # run os in qemu (binary)
 run: $(BUILD_DIR)/OS.bin
 	@echo -e "${CYAN}LAUNCH EMULATOR:${NC}"
-	qemu-system-x86_64 -drive format=raw,file=$<,index=0,if=floppy, -m 128M
+	qemu-system-x86_64 -drive format=raw,file=$<,index=0,if=floppy, -m 256M
 
 
 # launch with debugging (gdb, port 1234)
 debug: $(BUILD_DIR)/OS.bin
 	@echo -e "${CYAN}LAUNCH DEBUG SESSION:${NC}"
-	qemu-system-x86_64 -s -S -drive format=raw,file=$<,index=0,if=floppy, -m 128M
+	qemu-system-x86_64 -s -S -drive format=raw,file=$<,index=0,if=floppy, -m 256M
 
 	
 

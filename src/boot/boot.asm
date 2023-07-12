@@ -99,9 +99,9 @@ start_protected_mode:
     mov ebp, 0x90000
     mov esp, ebp
 
-    
 
     jmp KERNEL_LOCATION		; jump to kernel location
+
 
 
 boot_msg: db "kernel loaded, press any key to boot...", 0

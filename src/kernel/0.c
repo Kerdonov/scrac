@@ -1,7 +1,8 @@
 #include "system.h"
 
 extern void _start() {
-    debug_log("kernel loaded");
+    char *loadmsg = "kernel loaded";
+    debug_log(loadmsg);
     init();
     
     halt();
