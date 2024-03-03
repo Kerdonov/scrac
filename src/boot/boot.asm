@@ -1,6 +1,7 @@
 [org 0x7c00]
 [bits 16]
 KERNEL_LOCATION equ 0x1000
+STACK_BASE equ 0x8000
 
 BOOT_DISK: db 0
 mov [BOOT_DISK], dl
@@ -9,7 +10,7 @@ mov [BOOT_DISK], dl
 xor ax, ax
 mov es, ax
 mov ds, ax
-mov bp, 0x8000
+mov bp, STACK_BASE
 mov sp, bp
 
 ; load kernel
@@ -39,8 +40,8 @@ mov bx, boot_msg
     jmp .puts
 
 .end:
-    ;mov ah, 0
-    ;int 0x16
+    mov ah, 0
+    int 0x16
     popa
 
 ; switch to text mode

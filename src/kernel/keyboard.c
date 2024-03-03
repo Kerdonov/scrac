@@ -8,10 +8,7 @@
 bool shift = false;
 bool ctrl = false;
 
-void test_interrupt() {
-    int x = 1 / 0;
-}
-
+void (*reboot)(void) = (void (*)())NULL;
 
 char scancode_to_char(u8 scancode) {
     if (shift) {
@@ -103,8 +100,8 @@ char scancode_to_char(u8 scancode) {
 	    case 0x0d: return '\\';
 	    // backspace
 	    case 0x0e: return '\b';
-	    // tab (also test interrupt)
-	    case 0x0f: test_interrupt();
+	    // tab (also reboot)
+	    case 0x0f: reboot();
 		       return '\t';
 	    case 0x10: return 'q';
 	    case 0x11: return 'w';
