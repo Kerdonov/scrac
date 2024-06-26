@@ -10,6 +10,10 @@ bool ctrl = false;
 
 void (*reboot)(void) = (void (*)())NULL;
 
+void crash(void) {
+	int x = 1 / 0;
+}
+
 char scancode_to_char(u8 scancode) {
     if (shift) {
 	switch (scancode) {
@@ -101,7 +105,7 @@ char scancode_to_char(u8 scancode) {
 	    // backspace
 	    case 0x0e: return '\b';
 	    // tab (also reboot)
-	    case 0x0f: reboot();
+	    case 0x0f: crash();
 		       return '\t';
 	    case 0x10: return 'q';
 	    case 0x11: return 'w';

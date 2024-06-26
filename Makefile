@@ -8,12 +8,19 @@
 # 
 # By: Kerdonov
 
+.PHONY: bootloader kernel
 
 # build vars
 BUILD_DIR=build
 
 BOOT_SRC=src/boot
+STAGE2_SRC=src/boot/stage2
 KERNEL_SRC=src/kernel
+
+STAGE2_SOURCES_C=$(sort $(wildcard $(STAGE2_SRC)/*.c))
+STAGE2_OBJECTS_C=$(patsubst $(STAGE2_SRC)/%.c, $(BUILD_DIR)/boot/c/%.o, $(STAGE2_SOURCES_C))
+STAGE2_SOURCES_ASM=$(sort $(wildcard $(STAGE2_SRC)/*.asm))
+STAGE2_OBJECTS_ASM=$(patsubst $(STAGE2_SRC)/%.asm, $(BUILD_DIR)/boot/asm/%.o, $(STAGE2_SOURCES_ASM))
 
 KERNEL_SOURCES_C=$(sort $(wildcard $(KERNEL_SRC)/*.c))
 KERNEL_OBJECTS_C=$(patsubst $(KERNEL_SRC)/%.c, $(BUILD_DIR)/kernel/c/%.o, $(KERNEL_SOURCES_C))
@@ -42,97 +49,125 @@ export HEADER
 
 
 # beauty vars
-GREEN=\e[1;32m
-BLUE=\e[1;34m
-RED=\e[1;31m
-CYAN=\e[1;36m
-NC=\e[0m
+GREEN=\033[1;32m
+BLUE=\033[1;34m
+RED=\033[1;31m
+CYAN=\033[1;36m
+NC=\033[0m
+
+# floppy disk image
+disk: $(BUILD_DIR)/floppa.img
+
+$(BUILD_DIR)/floppa.img: bootloader kernel
+	@echo "${BLUE}WRITE FILES TO $@:${NC}"
+	dd if=/dev/zero of=$(BUILD_DIR)/floppa.img bs=512 count=2880
+	mkfs.fat -F 12 -n "scrac" $(BUILD_DIR)/floppa.img
+	dd if=$(BUILD_DIR)/boot/boot.bin of=$(BUILD_DIR)/floppa.img conv=notrunc
+	mcopy -i $(BUILD_DIR)/floppa.img $(BUILD_DIR)/boot/stage2.bin "::stage2.bin"
+	mcopy -i $(BUILD_DIR)/floppa.img $(BUILD_DIR)/kernel/kernel.bin "::kernel.bin"
 
 
-# bin
-build: $(BUILD_DIR)/OS.bin
 
 
-# main os bin file
-$(BUILD_DIR)/OS.bin: $(BUILD_DIR)/boot/boot.bin $(BUILD_DIR)/kernel/kernel.bin $(BUILD_DIR)/utility/zeroes.bin
-	@echo -e "${BLUE}COMBINE BOOTLOADER, KERNEL AND BUFFER:${NC}"
-	cat $^ > $@
+bootloader: $(BUILD_DIR)/boot/boot.bin $(BUILD_DIR)/boot/stage2.bin
 
-
-# bootloader
+# stage1
 $(BUILD_DIR)/boot/boot.bin: $(BOOT_SRC)/boot.asm
-	@echo -e "${GREEN}ASSEMBLE BOOTLOADER:${NC}"
+	@echo "${GREEN}ASSEMBLE BOOTLOADER:${NC}"
 	mkdir -p build/boot
 	nasm $< -f bin -o $@
 
+# stage2
+$(BUILD_DIR)/boot/stage2.bin: $(STAGE2_OBJECTS_C) $(STAGE2_OBJECTS_ASM)
+	@echo "${BLUE}LINK STAGE2:${NC}"
+	$(LD) -o $@ $^ --oformat binary
+
+$(BUILD_DIR)/boot/c/%.o: $(STAGE2_SRC)/%.c
+	@echo "${GREEN}COMPILE $(patsubst $(STAGE2_SRC)/%,%,$<):${NC}"
+	mkdir -p build/boot/c
+	$(CC) -ffreestanding -m32 -g -c -o $@ $<
+
+$(BUILD_DIR)/boot/asm/%.o: $(STAGE2_SRC)/%.asm
+	@echo "${GREEN}ASSEMBLE $(patsubst $(STAGE2_SRC)/%,%,$<):${NC}"
+	mkdir -p build/boot/asm
+	nasm $< -f elf -o $@
+
+
+
+kernel: $(BUILD_DIR)/kernel/kernel.bin
 
 # kernel entry + kernel
 $(BUILD_DIR)/kernel/kernel.bin: $(KERNEL_OBJECTS_C) $(KERNEL_OBJECTS_ASM)
-	@echo -e "${BLUE}LINK KERNEL OBJECT FILES:${NC}"
+	@echo "${BLUE}LINK KERNEL OBJECT FILES:${NC}"
 	mkdir -p build/kernel
 	$(LD) -o $@ -Ttext 0x1000 $^ --oformat binary
 
 $(BUILD_DIR)/kernel/c/%.o: $(KERNEL_SRC)/%.c
-	@echo -e "${GREEN}COMPILE $(patsubst $(KERNEL_SRC)/%,%,$<):${NC}"
+	@echo "${GREEN}COMPILE $(patsubst $(KERNEL_SRC)/%,%,$<):${NC}"
 	mkdir -p build/kernel/c
 	$(CC) -ffreestanding -m32 -g -c -o $@ $<
 
 $(BUILD_DIR)/kernel/asm/%.o: $(KERNEL_SRC)/%.asm
-	@echo -e "${GREEN}ASSEMBLE $(patsubst $(KERNEL_SRC)/%,%,$<):${NC}"
+	@echo "${GREEN}ASSEMBLE $(patsubst $(KERNEL_SRC)/%,%,$<):${NC}"
 	mkdir -p build/kernel/asm
 	nasm $< -f elf -o $@
 
 # rust in the future
 $(BUILD_DIR)/kernel/rs/%.o: $(KERNEL_SRC)/%.rs
-	@echo -e "${GREEN}COMPILE $(patsubst $(KERNEL_SRC)/%,%,$<):${NC}"
+	@echo "${GREEN}COMPILE $(patsubst $(KERNEL_SRC)/%,%,$<):${NC}"
 	mkdir -p build/kernel/rs
 	$(RUSTC) -o $@ $< --target=x86_64-unknown-none --emit=obj
 
 
 
-# padding
-$(BUILD_DIR)/utility/zeroes.bin: $(BOOT_SRC)/zeroes.asm
-	@echo -e "${GREEN}ASSEMBLE BUFFER:${NC}"
-	mkdir -p build/utility
-	nasm $< -f bin -o $@
 
 
+# boot disk image in qemu
+run: $(BUILD_DIR)/floppa.img
+	@echo "${CYAN}BOOT DISK IMAGE:${NC}"
+	qemu-system-i386 -drive format=raw,file=$<,index=0,if=floppy, -m 32
+	#qemu-system-i386 -debugcon stdio -m 32 -fda $<
 
-# run os in qemu (binary)
-run: $(BUILD_DIR)/OS.bin
-	@echo -e "${CYAN}LAUNCH EMULATOR:${NC}"
-	qemu-system-x86_64 -drive format=raw,file=$<,index=0,if=floppy, -m 256M
 
-
-# launch with debugging (gdb, port 1234)
-debug: $(BUILD_DIR)/OS.bin
-	@echo -e "${CYAN}LAUNCH DEBUG SESSION:${NC}"
+# launch debugging sesh
+debug: $(BUILD_DIR)/floppa.img
+	@echo "${CYAN}LAUNCH DEBUG SESSION:${NC} (gdb: target remote localhost:1234)"
 	qemu-system-x86_64 -s -S -drive format=raw,file=$<,index=0,if=floppy, -m 256M
+	#bochs -f bochs_config
+
 
 	
 
 # clean build dir
 clean:
-	@echo -e "${RED}CLEAN BUILD FILES:${NC}"
+	@echo "${RED}CLEAN BUILD FILES:${NC}"
 	rm -rf $(BUILD_DIR)/*
 
 # print project info
 info: header
 	@echo "This is a project by Kerdonov. Heavily inspired by Daedalus Community YouTube channel."
-	@echo -e "Written in x86 assembly and C(++) for BIOS systems on x86.\n"
-	@echo "Commands:"
-	@echo -e "${GREEN}$$ make build${NC}\t\tbuild the OS.bin file"
-	@echo -e "${GREEN}$$ make run${NC}\t\tbuild and run OS.bin on qemu"
-	@echo -e "${GREEN}$$ make debug${NC}\t\trun in debug mode (gdb port 1234)"
-	@echo -e "${GREEN}$$ make clean${NC}\t\tclean build directory\n"
-	@echo -e "This project needs i386elfgcc and binutils to cross compile C code. For more info, see this install script (for Arch Linux)"
-	@echo -e "${SCRIPT_LINK}\n"
-	@echo -e "I want to thank Daedalus Community, nanobyte, Uncle Scientist on YouTube, Philipp Oppermann and Brandon F. for teaching me the basics of operating system development.\n"
+	@echo "Written in x86 assembly and C(++) for BIOS systems on x86.\n"
+	@echo "${GREEN}Make Commands:${NC}"
+	@echo "${GREEN}$$ make build${NC}\t\tbuild the floppa.img file"
+	@echo "${GREEN}$$ make run${NC}\t\tbuild and run floppa.img on qemu"
+	@echo "${GREEN}$$ make debug${NC}\t\trun in debug mode (gdb port 1234)"
+	@echo "${GREEN}$$ make clean${NC}\t\tclean build directory\n"
+	
+	@echo "${RED}Error codes:${NC}"
+	@echo "${RED}B${NC} - kernel loading successful"
+	@echo "${RED}1${NC} - floppy disk read error"
+	@echo "${RED}2${NC} - kernel not found error"
+
+	@echo ""
+
+	@echo "This project needs i386elfgcc and binutils to cross compile C code. For more info, see this install script (for Arch Linux)"
+	@echo "${SCRIPT_LINK}\n"
+	@echo "I want to thank Daedalus Community, nanobyte, Uncle Scientist on YouTube, Philipp Oppermann and Brandon F. for teaching me the basics of operating system development.\n"
 	@echo "I ♡ GNU make now, wth"
 
 header:
 	@echo ""
-	@echo -e "${BLUE}$$HEADER${NC}"
+	@echo "${BLUE}$$HEADER${NC}"
 
 
 
